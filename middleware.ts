@@ -22,7 +22,15 @@ export function middleware(req: NextRequest) {
     pathname.startsWith("/static") ||
     pathname.startsWith("/api/auth/")
   ) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    
+    // Adicionar headers CSP para permitir conexões com Supabase e Vercel
+    res.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+    );
+    
+    return res;
   }
 
   // Apenas proteger /admin e /funcionario
@@ -44,14 +52,30 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/admin", req.url));
       }
 
-      return NextResponse.next();
+      const res = NextResponse.next();
+      
+      // Adicionar headers CSP
+      res.headers.set(
+        "Content-Security-Policy",
+        "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+      );
+      
+      return res;
     } catch {
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
   // Todas as outras rotas passam direto
-  return NextResponse.next();
+  const res = NextResponse.next();
+  
+  // Adicionar headers CSP
+  res.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+  );
+  
+  return res;
 }
 
 export const config = {
