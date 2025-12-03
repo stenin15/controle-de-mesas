@@ -20,16 +20,16 @@ export default function LoginPage() {
       credentials: 'include',
     });
 
+    // LER JSON APENAS UMA VEZ
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      setErro(data.error || 'Erro ao fazer login');
+      setErro(data.error || 'Credenciais inválidas');
       return;
     }
 
-    const data = await res.json();
-    const role = data.user?.role;
-
-    if (role === 'admin') {
+    // Usar data já lido acima
+    if (data?.user?.role === 'admin') {
       router.push('/admin');
     } else {
       router.push('/funcionario');
