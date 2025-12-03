@@ -18,13 +18,13 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto;
 UPDATE usuarios
 SET 
   senha_hash = crypt('MinhaSenha123', gen_salt('bf')),
-  papel = 'admin',
+  role = 'admin',
   nome = 'Administrador'
 WHERE email = 'admin@admin.com';
 
 -- Se nenhuma linha foi atualizada, criar o usuário
 -- (Ajuste conforme sua estrutura de tabela)
-INSERT INTO usuarios (email, senha_hash, papel, nome)
+INSERT INTO usuarios (email, senha_hash, role, nome)
 SELECT 
   'admin@admin.com',
   crypt('MinhaSenha123', gen_salt('bf')),
@@ -39,7 +39,7 @@ SELECT
   id,
   email,
   nome,
-  papel,
+  role,
   CASE 
     WHEN senha_hash IS NOT NULL THEN '✅ Senha definida'
     ELSE '❌ Senha não definida'
