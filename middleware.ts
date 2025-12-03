@@ -22,16 +22,9 @@ export function middleware(req: NextRequest) {
     pathname.startsWith("/static") ||
     pathname.startsWith("/api/auth/")
   ) {
-    const res = NextResponse.next();
-    
-    // Adicionar headers CSP para permitir conexões com Supabase e Vercel
-    // Permite unsafe-eval para Next.js funcionar corretamente
-    res.headers.set(
-      "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
-    );
-    
-    return res;
+    // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
+    // Se o projeto funcionar sem CSP, podemos adicionar depois de forma mais permissiva
+    return NextResponse.next();
   }
 
   // Apenas proteger /admin e /funcionario
@@ -53,30 +46,16 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/admin", req.url));
       }
 
-      const res = NextResponse.next();
-      
-      // Adicionar headers CSP
-      res.headers.set(
-        "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
-      );
-      
-      return res;
+      // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
+      return NextResponse.next();
     } catch {
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
   // Todas as outras rotas passam direto
-  const res = NextResponse.next();
-  
-  // Adicionar headers CSP
-  res.headers.set(
-    "Content-Security-Policy",
-    "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
-  );
-  
-  return res;
+  // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
+  return NextResponse.next();
 }
 
 export const config = {
