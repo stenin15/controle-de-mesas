@@ -11,12 +11,6 @@ export interface UserPayload {
   nome: string;
 }
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('JWT_SECRET não definido nas variáveis de ambiente');
-}
-
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
@@ -25,24 +19,35 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export function generateToken(user: UserPayload): string {
+export function generateToken(user: any) {
+  const SECRET = process.env.JWT_SECRET;
+
+  if (!SECRET) {
+    throw new Error('JWT_SECRET não está definido no ambiente da Vercel.');
+  }
+
   return jwt.sign(
     {
-      sub: user.id,
+      id: user.id,
       email: user.email,
-      role: user.role,
       nome: user.nome,
     },
-    JWT_SECRET,
+    SECRET,
     { expiresIn: '7d' }
   );
 }
 
 export function verifyToken(token: string): UserPayload {
-  const decoded = jwt.verify(token, JWT_SECRET!) as any;
+  const SECRET = process.env.JWT_SECRET;
+
+  if (!SECRET) {
+    throw new Error('JWT_SECRET não está definido no ambiente da Vercel.');
+  }
+
+  const decoded = jwt.verify(token, SECRET) as any;
 
   return {
-    id: decoded.sub as string,
+    id: decoded.id as string,
     email: decoded.email as string,
     role: decoded.role as UserRole,
     nome: decoded.nome as string,
