@@ -13,18 +13,27 @@
 -- Verificar se a extensão pgcrypto está habilitada
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
--- Atualizar ou criar usuário admin
--- Se não existir, será criado (dependendo da estrutura da tabela)
+-- ============================================
+-- ATUALIZAR SENHA DO ADMIN NO SUPABASE
+-- ============================================
+-- 
+-- IMPORTANTE: A tabela usa 'papel', não 'role'
+-- O valor pode ser 'admin' ou 'administrador'
+-- ============================================
+
+-- Verificar se a extensão pgcrypto está habilitada
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+-- Atualizar usuário admin (usa 'papel', não 'role')
 UPDATE usuarios
 SET 
   senha_hash = crypt('MinhaSenha123', gen_salt('bf')),
-  role = 'admin',
+  papel = 'admin',
   nome = 'Administrador'
 WHERE email = 'admin@admin.com';
 
--- Se nenhuma linha foi atualizada, criar o usuário
--- (Ajuste conforme sua estrutura de tabela)
-INSERT INTO usuarios (email, senha_hash, role, nome)
+-- Se não existir, criar o usuário
+INSERT INTO usuarios (email, senha_hash, papel, nome)
 SELECT 
   'admin@admin.com',
   crypt('MinhaSenha123', gen_salt('bf')),
@@ -39,7 +48,7 @@ SELECT
   id,
   email,
   nome,
-  role,
+  papel,
   CASE 
     WHEN senha_hash IS NOT NULL THEN '✅ Senha definida'
     ELSE '❌ Senha não definida'
