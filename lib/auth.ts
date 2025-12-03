@@ -66,7 +66,7 @@ export async function authenticateUser(email: string, password: string): Promise
 
   const { data, error } = await supabaseAdmin
     .from('usuarios')
-    .select('id, email, senha_hash, role, nome')
+    .select('id, email, senha_hash, papel, nome')
     .eq('email', email)
     .single();
 
@@ -89,7 +89,7 @@ export async function authenticateUser(email: string, password: string): Promise
   return {
     id: data.id,
     email: data.email,
-    role: data.role as 'admin' | 'funcionario',
+    role: (data.papel ?? 'admin') as UserRole,
     nome: data.nome,
   };
 }
