@@ -55,29 +55,13 @@ export function verifyToken(token: string): UserPayload {
 }
 
 export async function authenticateUser(email: string, password: string): Promise<UserPayload | null> {
-  // Debug: verificar URL do Supabase
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 [authenticateUser] Conectando ao Supabase:', supabaseUrl);
-    if (supabaseUrl && supabaseUrl.includes('localhost')) {
-      console.error('⚠️ ERRO: Tentando conectar ao localhost em vez do Supabase!');
-    }
-  }
-
   const { data, error } = await supabaseAdmin
     .from('usuarios')
     .select('id, email, senha_hash, papel, nome')
     .eq('email', email)
     .single();
 
-  if (error) {
-    console.error('❌ [authenticateUser] Erro ao buscar usuário:', error.message);
-    console.error('   Código:', error.code);
-    return null;
-  }
-
-  if (!data) {
-    console.log('⚠️ [authenticateUser] Usuário não encontrado');
+  if (error || !data) {
     return null;
   }
 
@@ -89,7 +73,7 @@ export async function authenticateUser(email: string, password: string): Promise
   return {
     id: data.id,
     email: data.email,
-    role: (data.papel ?? 'admin') as UserRole,
+    role: data.papel as 'admin' | 'funcionario',
     nome: data.nome,
   };
 }
