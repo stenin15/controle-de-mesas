@@ -56,7 +56,8 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Apenas intercepta rotas que começam com /admin ou /funcionario
+    // Intercepta rotas protegidas e raiz
+    "/",
     "/admin/:path*",
     "/funcionario/:path*",
   ],
