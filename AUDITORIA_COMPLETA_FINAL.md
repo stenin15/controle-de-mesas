@@ -62,3 +62,4 @@ Confirmar que todas as 5 variáveis estão configuradas.
 4. Verificar variáveis de ambiente na Vercel
 5. Testar login novamente
 
+

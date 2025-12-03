@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 
+export const runtime = "nodejs";
+
 export async function GET(request: NextRequest) {
   const token = request.cookies.get('token')?.value;
 

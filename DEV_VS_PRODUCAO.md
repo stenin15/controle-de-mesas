@@ -118,3 +118,4 @@ npm run dev
 
 **Resumo: `npm run dev` é só para testar localmente. Para o Vercel funcionar, NÃO precisa!** 🚀
 
+

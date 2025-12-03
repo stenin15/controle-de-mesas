@@ -14,3 +14,4 @@ WHERE table_name = 'usuarios'
   AND table_schema = 'public'
 ORDER BY ordinal_position;
 
+

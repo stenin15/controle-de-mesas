@@ -154,3 +154,4 @@ WHERE NOT EXISTS (
 - `CONFIGURAR_ENV_VERCEL.md` - Guia Vercel
 - `VERIFICAR_ENV_LOCAL.md` - Guia local
 
+

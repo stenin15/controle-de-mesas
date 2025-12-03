@@ -138,3 +138,4 @@ Após criar o usuário admin e aguardar o deploy:
 
 **Após criar o admin, o sistema deve funcionar 100%!** 🚀
 
+

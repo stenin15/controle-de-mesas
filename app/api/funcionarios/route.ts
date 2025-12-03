@@ -3,6 +3,8 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { verifyToken } from '@/lib/auth';
 import { hashPassword } from '@/lib/auth';
 
+export const runtime = "nodejs";
+
 // GET — Listar funcionários (apenas admin)
 export async function GET(request: NextRequest) {
   try {

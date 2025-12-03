@@ -108,3 +108,4 @@ Após adicionar todas as variáveis:
 
 **Todas as variáveis estão aqui, prontas para copiar e colar!** ✅
 
+

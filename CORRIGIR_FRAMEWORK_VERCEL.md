@@ -81,3 +81,4 @@ Development Command: next dev (ou deixar padrão)
 
 **Mude o Framework Preset para "Next.js" e salve!** 🎯
 
+

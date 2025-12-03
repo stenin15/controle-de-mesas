@@ -24,3 +24,4 @@ SET
 -- 3. Verificar se foi criado
 SELECT id, email, nome, papel, created_at FROM usuarios WHERE email = 'admin@admin.com';
 
+

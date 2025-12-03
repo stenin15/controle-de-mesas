@@ -21,3 +21,4 @@ O aviso que você está vendo:
 
 Vou remover o CSP do middleware para testar se é isso que está bloqueando:
 
+

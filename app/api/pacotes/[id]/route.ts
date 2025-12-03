@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+export const runtime = "nodejs";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }

@@ -81,3 +81,4 @@ Se funcionar, está tudo certo! ✅
 
 **IMPORTANTE:** Sem essas variáveis na Vercel, o projeto NÃO funcionará em produção! ⚠️
 
+

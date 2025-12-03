@@ -75,3 +75,4 @@ Após o deploy concluir (~1-2 minutos):
 
 **Aguarde o deploy e teste. Deve funcionar 100% agora!** ✅
 
+

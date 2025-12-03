@@ -144,3 +144,4 @@ Aguarde o deploy concluir (~1-2 minutos).
 
 **Com essas correções, o login DEVE funcionar!** 🚀✅
 
+

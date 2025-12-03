@@ -85,3 +85,4 @@ Depois de verificar qual coluna existe, me diga:
 
 **Execute o primeiro SQL e me diga qual coluna aparece!** 🔍
 
+
