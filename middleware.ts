@@ -12,12 +12,24 @@ export function middleware(req: NextRequest) {
     pathname.startsWith("/static") ||
     pathname.startsWith("/api")
   ) {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    // Habilita cookies cross-path e desbloqueia Supabase/Vercel
+    res.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+    );
+    return res;
   }
 
   // Rotas públicas
   if (pathname === "/" || pathname === "/login") {
-    return NextResponse.next();
+    const res = NextResponse.next();
+    // Habilita cookies cross-path e desbloqueia Supabase/Vercel
+    res.headers.set(
+      "Content-Security-Policy",
+      "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+    );
+    return res;
   }
 
   // Proteger apenas /admin e /funcionario
@@ -25,35 +37,60 @@ export function middleware(req: NextRequest) {
     const token = req.cookies.get("token")?.value;
 
     if (!token) {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const res = NextResponse.redirect(new URL("/login", req.url));
+      res.headers.set(
+        "Content-Security-Policy",
+        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+      );
+      return res;
     }
 
     try {
       const user = verifyToken(token);
 
       if (pathname.startsWith("/admin") && user.role !== "admin") {
-        return NextResponse.redirect(new URL("/funcionario", req.url));
+        const res = NextResponse.redirect(new URL("/funcionario", req.url));
+        res.headers.set(
+          "Content-Security-Policy",
+          "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+        );
+        return res;
       }
 
       if (pathname.startsWith("/funcionario") && user.role === "admin") {
-        return NextResponse.redirect(new URL("/admin", req.url));
+        const res = NextResponse.redirect(new URL("/admin", req.url));
+        res.headers.set(
+          "Content-Security-Policy",
+          "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+        );
+        return res;
       }
 
-      return NextResponse.next();
+      const res = NextResponse.next();
+      res.headers.set(
+        "Content-Security-Policy",
+        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+      );
+      return res;
     } catch {
-      return NextResponse.redirect(new URL("/login", req.url));
+      const res = NextResponse.redirect(new URL("/login", req.url));
+      res.headers.set(
+        "Content-Security-Policy",
+        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+      );
+      return res;
     }
   }
 
-  return NextResponse.next();
+  const res = NextResponse.next();
+  // Habilita cookies cross-path e desbloqueia Supabase/Vercel
+  res.headers.set(
+    "Content-Security-Policy",
+    "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
+  );
+  return res;
 }
 
 export const config = {
-  matcher: [
-    "/login",
-    "/api/:path*",
-    "/",
-    "/admin/:path*",
-    "/funcionario/:path*",
-  ],
+  matcher: ['/login', '/api/:path*', '/admin/:path*', '/funcionario/:path*'],
 };
