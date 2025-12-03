@@ -57,23 +57,25 @@ export function verifyToken(token: string): UserPayload {
 export async function authenticateUser(email: string, password: string): Promise<UserPayload | null> {
   const { data, error } = await supabaseAdmin
     .from('usuarios')
-    .select('id, email, senha_hash, papel, nome')
+    .select('id, email, senha_hash, role, nome')
     .eq('email', email)
     .single();
 
   if (error || !data) {
+    console.error('❌ [authenticateUser] Erro ao buscar usuário:', error?.message || 'Usuário não encontrado');
     return null;
   }
 
   const isValid = await verifyPassword(password, data.senha_hash);
   if (!isValid) {
+    console.error('❌ [authenticateUser] Senha inválida para:', email);
     return null;
   }
 
   return {
     id: data.id,
     email: data.email,
-    role: data.papel as 'admin' | 'funcionario',
+    role: (data.role || 'funcionario') as UserRole,
     nome: data.nome,
   };
 }

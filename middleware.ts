@@ -25,9 +25,10 @@ export function middleware(req: NextRequest) {
     const res = NextResponse.next();
     
     // Adicionar headers CSP para permitir conexões com Supabase e Vercel
+    // Permite unsafe-eval para Next.js funcionar corretamente
     res.headers.set(
       "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+      "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
     );
     
     return res;
@@ -57,7 +58,7 @@ export function middleware(req: NextRequest) {
       // Adicionar headers CSP
       res.headers.set(
         "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+        "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
       );
       
       return res;
@@ -72,7 +73,7 @@ export function middleware(req: NextRequest) {
   // Adicionar headers CSP
   res.headers.set(
     "Content-Security-Policy",
-    "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co; script-src 'self' 'unsafe-inline'; frame-ancestors 'self';"
+    "default-src 'self'; connect-src 'self' https://controle-de-mesas-git-main-stenios-projects-07a3b7e7.vercel.app https://*.supabase.co https://controle-de-mesas.vercel.app; script-src 'self' 'unsafe-inline' 'unsafe-eval'; frame-ancestors 'self';"
   );
   
   return res;
