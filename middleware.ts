@@ -80,7 +80,8 @@ export function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    // Intercepta rotas protegidas e raiz
+    "/login",
+    "/api/:path*",
     "/",
     "/admin/:path*",
     "/funcionario/:path*",
