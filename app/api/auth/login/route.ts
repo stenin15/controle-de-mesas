@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authenticateUser, generateToken, UserPayload } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
+export const runtime = "nodejs";
+
 export async function POST(request: NextRequest) {
   console.log('='.repeat(50));
   console.log('🔵 API /api/auth/login CHAMADA');
