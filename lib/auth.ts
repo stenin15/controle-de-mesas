@@ -60,10 +60,10 @@ export async function authenticateUser(
   email: string,
   password: string
 ): Promise<UserPayload | null> {
-  // ATENÇÃO: A tabela real no Supabase usa 'papel', não 'role'
+  // Usar 'role' conforme schema.sql
   const { data, error } = await supabaseAdmin
     .from('usuarios')
-    .select('id, email, senha_hash, papel, nome')
+    .select('id, email, senha_hash, role, nome')
     .eq('email', email)
     .single();
 
@@ -81,13 +81,7 @@ export async function authenticateUser(
     return null;
   }
 
-  // Mapear 'papel' do banco para 'role' do código
-  // 'administrador' ou 'admin' → 'admin'
-  // qualquer outro → 'funcionario'
-  let role: UserRole = 'funcionario';
-  if (data.papel === 'admin' || data.papel === 'administrador') {
-    role = 'admin';
-  }
+  const role = (data.role || 'funcionario') as UserRole;
 
   return {
     id: data.id,
