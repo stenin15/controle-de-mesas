@@ -20,10 +20,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function generateToken(user: any) {
-  const SECRET = process.env.JWT_SECRET;
+  const SECRET = process.env.JWT_SECRET as string;
 
   if (!SECRET) {
-    throw new Error('JWT_SECRET não está definido no ambiente da Vercel.');
+    throw new Error('JWT_SECRET não está definido no ambiente.');
   }
 
   return jwt.sign(
