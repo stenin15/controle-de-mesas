@@ -4,9 +4,10 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const token = request.cookies.get('token')?.value;
 
     if (!token) {
@@ -29,7 +30,7 @@ export async function GET(
     const { data, error } = await supabaseAdmin
       .from('pacotes')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !data) {
