@@ -19,18 +19,20 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export function generateToken(user: any) {
+export function generateToken(user: UserPayload) {
   const SECRET = process.env.JWT_SECRET as string;
 
   if (!SECRET) {
     throw new Error('JWT_SECRET não está definido no ambiente.');
   }
 
+  // IMPORTANTE: incluir a role no token também
   return jwt.sign(
     {
       id: user.id,
       email: user.email,
       nome: user.nome,
+      role: user.role,
     },
     SECRET,
     { expiresIn: '7d' }
@@ -54,15 +56,22 @@ export function verifyToken(token: string): UserPayload {
   };
 }
 
-export async function authenticateUser(email: string, password: string): Promise<UserPayload | null> {
+export async function authenticateUser(
+  email: string,
+  password: string
+): Promise<UserPayload | null> {
+  // ATENÇÃO: usar PAPEL, não ROLE
   const { data, error } = await supabaseAdmin
     .from('usuarios')
-    .select('id, email, senha_hash, role, nome')
+    .select('id, email, senha_hash, papel, nome')
     .eq('email', email)
     .single();
 
   if (error || !data) {
-    console.error('❌ [authenticateUser] Erro ao buscar usuário:', error?.message || 'Usuário não encontrado');
+    console.error(
+      '❌ [authenticateUser] Erro ao buscar usuário:',
+      error?.message || 'Usuário não encontrado'
+    );
     return null;
   }
 
@@ -72,10 +81,12 @@ export async function authenticateUser(email: string, password: string): Promise
     return null;
   }
 
+  const role = (data.papel || 'funcionario') as UserRole;
+
   return {
     id: data.id,
     email: data.email,
-    role: (data.role || 'funcionario') as UserRole,
+    role,
     nome: data.nome,
   };
 }
