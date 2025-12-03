@@ -5,29 +5,22 @@ import { verifyToken } from "@/lib/auth";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // SEMPRE permitir estas rotas - nunca interceptar
-  const publicPaths = [
-    "/",
-    "/login",
-    "/api/auth/login",
-    "/api/auth/logout",
-    "/api/test",
-  ];
-
-  // Verificar se é rota pública
+  // SEMPRE permitir assets e APIs - nunca interceptar
   if (
-    publicPaths.includes(pathname) ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/static") ||
-    pathname.startsWith("/api/auth/")
+    pathname.startsWith("/api")
   ) {
-    // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
-    // Se o projeto funcionar sem CSP, podemos adicionar depois de forma mais permissiva
     return NextResponse.next();
   }
 
-  // Apenas proteger /admin e /funcionario
+  // Rotas públicas
+  if (pathname === "/" || pathname === "/login") {
+    return NextResponse.next();
+  }
+
+  // Proteger apenas /admin e /funcionario
   if (pathname.startsWith("/admin") || pathname.startsWith("/funcionario")) {
     const token = req.cookies.get("token")?.value;
 
@@ -46,15 +39,12 @@ export function middleware(req: NextRequest) {
         return NextResponse.redirect(new URL("/admin", req.url));
       }
 
-      // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
       return NextResponse.next();
     } catch {
       return NextResponse.redirect(new URL("/login", req.url));
     }
   }
 
-  // Todas as outras rotas passam direto
-  // CSP REMOVIDO TEMPORARIAMENTE PARA TESTE
   return NextResponse.next();
 }
 
