@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload, TokenExpiredError, JsonWebTokenError } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import { supabaseAdmin } from './supabaseAdmin';
 
@@ -11,6 +11,12 @@ export interface UserPayload {
   nome: string;
 }
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET não definido nas variáveis de ambiente');
+}
+
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 10);
 }
@@ -19,74 +25,93 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
   return bcrypt.compare(password, hash);
 }
 
-export function generateToken(user: UserPayload) {
-  const SECRET = process.env.JWT_SECRET as string;
-
-  if (!SECRET) {
-    throw new Error('JWT_SECRET não está definido no ambiente.');
-  }
-
-  // IMPORTANTE: incluir a role no token também
+export function generateToken(user: UserPayload): string {
   return jwt.sign(
     {
-      id: user.id,
+      sub: user.id,
       email: user.email,
-      nome: user.nome,
       role: user.role,
+      nome: user.nome,
     },
-    SECRET,
+    JWT_SECRET,
     { expiresIn: '7d' }
   );
 }
 
-export function verifyToken(token: string): UserPayload {
-  const SECRET = process.env.JWT_SECRET;
-
-  if (!SECRET) {
-    throw new Error('JWT_SECRET não está definido no ambiente da Vercel.');
+export function verifyToken(token: string): UserPayload | null {
+  if (!JWT_SECRET) {
+    console.error('JWT_SECRET não configurado');
+    return null;
   }
 
-  const decoded = jwt.verify(token, SECRET) as any;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload & {
+      sub: string;
+      email: string;
+      role: UserRole;
+      nome: string;
+    };
 
-  return {
-    id: decoded.id as string,
-    email: decoded.email as string,
-    role: decoded.role as UserRole,
-    nome: decoded.nome as string,
-  };
+    // Validar campos obrigatórios
+    if (!decoded.sub || !decoded.email || !decoded.role || !decoded.nome) {
+      console.error('Token inválido: campos obrigatórios faltando');
+      return null;
+    }
+
+    return {
+      id: decoded.sub,
+      email: decoded.email,
+      role: decoded.role,
+      nome: decoded.nome,
+    };
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      console.error('Token expirado');
+    } else if (error instanceof JsonWebTokenError) {
+      console.error('Token inválido:', error.message);
+    } else {
+      console.error('Erro ao verificar token:', error);
+    }
+    return null;
+  }
 }
 
-export async function authenticateUser(
-  email: string,
-  password: string
-): Promise<UserPayload | null> {
-  // ATENÇÃO: A tabela real usa 'papel', não 'role'
+export async function authenticateUser(email: string, password: string): Promise<UserPayload | null> {
+  // Debug: verificar URL do Supabase
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 [authenticateUser] Conectando ao Supabase:', supabaseUrl);
+    if (supabaseUrl && supabaseUrl.includes('localhost')) {
+      console.error('⚠️ ERRO: Tentando conectar ao localhost em vez do Supabase!');
+    }
+  }
+
   const { data, error } = await supabaseAdmin
     .from('usuarios')
-    .select('id, email, senha_hash, papel, nome')
+    .select('id, email, senha_hash, role, nome')
     .eq('email', email)
     .single();
 
-  if (error || !data) {
-    console.error(
-      '❌ [authenticateUser] Erro ao buscar usuário:',
-      error?.message || 'Usuário não encontrado'
-    );
+  if (error) {
+    console.error('❌ [authenticateUser] Erro ao buscar usuário:', error.message);
+    console.error('   Código:', error.code);
+    return null;
+  }
+
+  if (!data) {
+    console.log('⚠️ [authenticateUser] Usuário não encontrado');
     return null;
   }
 
   const isValid = await verifyPassword(password, data.senha_hash);
   if (!isValid) {
-    console.error('❌ [authenticateUser] Senha inválida para:', email);
     return null;
   }
-
-  const role = (data.papel || 'funcionario') as UserRole;
 
   return {
     id: data.id,
     email: data.email,
-    role,
+    role: data.role as 'admin' | 'funcionario',
     nome: data.nome,
   };
 }

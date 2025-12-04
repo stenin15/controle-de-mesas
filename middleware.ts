@@ -5,92 +5,85 @@ import { verifyToken } from "@/lib/auth";
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // SEMPRE permitir assets e APIs - nunca interceptar
+  console.log('🟡 [MIDDLEWARE] Requisição recebida:', {
+    pathname,
+    method: req.method,
+    url: req.url
+  });
+
+  // SEMPRE permitir estas rotas - nunca interceptar
+  const publicPaths = [
+    "/",
+    "/login",
+    "/api/auth/login",
+    "/api/auth/logout",
+    "/api/test",
+  ];
+
+  // Verificar se é rota pública
   if (
+    publicPaths.includes(pathname) ||
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon") ||
     pathname.startsWith("/static") ||
-    pathname.startsWith("/api")
+    pathname.startsWith("/api/auth/")
   ) {
-    const res = NextResponse.next();
-    // Habilita cookies cross-path e desbloqueia Supabase/Vercel
-    res.headers.set(
-      "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-    );
-    return res;
+    console.log('🟢 [MIDDLEWARE] Rota pública - permitindo acesso:', pathname);
+    return NextResponse.next();
   }
 
-  // Rotas públicas
-  if (pathname === "/" || pathname === "/login") {
-    const res = NextResponse.next();
-    // Habilita cookies cross-path e desbloqueia Supabase/Vercel
-    res.headers.set(
-      "Content-Security-Policy",
-      "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-    );
-    return res;
-  }
-
-  // Proteger apenas /admin e /funcionario
+  // Apenas proteger /admin e /funcionario
   if (pathname.startsWith("/admin") || pathname.startsWith("/funcionario")) {
+    console.log('🔐 [MIDDLEWARE] Rota protegida detectada:', pathname);
+    
     const token = req.cookies.get("token")?.value;
+    
+    console.log('🔐 [MIDDLEWARE] Token encontrado?', !!token);
+    console.log('🔐 [MIDDLEWARE] Cookies disponíveis:', req.cookies.getAll().map(c => c.name));
 
     if (!token) {
-      const res = NextResponse.redirect(new URL("/login", req.url));
-      res.headers.set(
-        "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-      );
-      return res;
+      console.log('🔴 [MIDDLEWARE] Token não encontrado - redirecionando para /login');
+      return NextResponse.redirect(new URL("/login", req.url));
     }
 
-    try {
-      const user = verifyToken(token);
+    console.log('🔐 [MIDDLEWARE] Verificando token...');
+    const user = verifyToken(token);
 
-      if (pathname.startsWith("/admin") && user.role !== "admin") {
-        const res = NextResponse.redirect(new URL("/funcionario", req.url));
-        res.headers.set(
-          "Content-Security-Policy",
-          "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-        );
-        return res;
-      }
-
-      if (pathname.startsWith("/funcionario") && user.role === "admin") {
-        const res = NextResponse.redirect(new URL("/admin", req.url));
-        res.headers.set(
-          "Content-Security-Policy",
-          "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-        );
-        return res;
-      }
-
-      const res = NextResponse.next();
-      res.headers.set(
-        "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-      );
-      return res;
-    } catch {
-      const res = NextResponse.redirect(new URL("/login", req.url));
-      res.headers.set(
-        "Content-Security-Policy",
-        "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-      );
-      return res;
+    if (!user) {
+      console.log('🔴 [MIDDLEWARE] Token inválido ou expirado - redirecionando para /login');
+      return NextResponse.redirect(new URL("/login", req.url));
     }
+
+    console.log('✅ [MIDDLEWARE] Token válido:', {
+      userId: user.id,
+      email: user.email,
+      role: user.role,
+      nome: user.nome
+    });
+
+    if (pathname.startsWith("/admin") && user.role !== "admin") {
+      console.log('🟡 [MIDDLEWARE] Usuário não é admin - redirecionando para /funcionario');
+      return NextResponse.redirect(new URL("/funcionario", req.url));
+    }
+
+    if (pathname.startsWith("/funcionario") && user.role === "admin") {
+      console.log('🟡 [MIDDLEWARE] Admin tentando acessar área de funcionário - redirecionando para /admin');
+      return NextResponse.redirect(new URL("/admin", req.url));
+    }
+
+    console.log('✅ [MIDDLEWARE] Acesso permitido para:', pathname);
+    return NextResponse.next();
   }
 
-  const res = NextResponse.next();
-  // Habilita cookies cross-path e desbloqueia Supabase/Vercel
-  res.headers.set(
-    "Content-Security-Policy",
-    "default-src 'self'; connect-src 'self' https://*.supabase.co https://*.vercel.app; script-src 'self' 'unsafe-inline';"
-  );
-  return res;
+  // Todas as outras rotas passam direto
+  console.log('🟢 [MIDDLEWARE] Rota não protegida - permitindo acesso:', pathname);
+  return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/login', '/api/:path*', '/admin/:path*', '/funcionario/:path*'],
+  matcher: [
+    // Apenas intercepta rotas que começam com /admin ou /funcionario
+    "/admin/:path*",
+    "/funcionario/:path*",
+  ],
 };

@@ -3,8 +3,6 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { generateQRCode } from '@/lib/utils';
 import { verifyToken } from '@/lib/auth';
 
-export const runtime = "nodejs";
-
 export async function POST(request: NextRequest) {
   try {
     // Autenticação

@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { verifyToken } from '@/lib/auth';
 
-export const runtime = "nodejs";
-
 export async function POST(request: NextRequest) {
   try {
     const token = request.cookies.get('token')?.value;

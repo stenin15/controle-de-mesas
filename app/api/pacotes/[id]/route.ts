@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyToken } from '@/lib/auth';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
-export const runtime = "nodejs";
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id } = await params;
     const token = request.cookies.get('token')?.value;
 
     if (!token) {
@@ -32,7 +29,7 @@ export async function GET(
     const { data, error } = await supabaseAdmin
       .from('pacotes')
       .select('*')
-      .eq('id', id)
+      .eq('id', params.id)
       .single();
 
     if (error || !data) {

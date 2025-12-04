@@ -19,25 +19,61 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     async function fetchUser() {
+      console.log('🔵 [AdminLayout] Verificando autenticação do usuário...');
+      console.log('🔵 [AdminLayout] Pathname atual:', pathname);
+      
       try {
-        const res = await fetch('/api/auth/me');
+        console.log('🔵 [AdminLayout] Fazendo requisição para /api/auth/me...');
+        const res = await fetch('/api/auth/me', {
+          credentials: 'include',
+        });
+        
+        console.log('🔵 [AdminLayout] Resposta recebida:', {
+          status: res.status,
+          ok: res.ok,
+          statusText: res.statusText
+        });
+        
         const data = await res.json();
+        console.log('🔵 [AdminLayout] Dados recebidos:', {
+          hasUser: !!data.user,
+          userRole: data.user?.role,
+          hasError: !!data.error,
+          error: data.error
+        });
 
         if (!res.ok || !data.user || data.user.role !== 'admin') {
+          console.error('🔴 [AdminLayout] Acesso negado:', {
+            resOk: res.ok,
+            hasUser: !!data.user,
+            userRole: data.user?.role,
+            expectedRole: 'admin'
+          });
+          console.log('🔴 [AdminLayout] Redirecionando para /login...');
           router.push('/login');
           return;
         }
 
+        console.log('✅ [AdminLayout] Usuário autenticado como admin:', {
+          id: data.user.id,
+          nome: data.user.nome,
+          email: data.user.email
+        });
         setUser(data.user);
-      } catch (error) {
+      } catch (error: any) {
+        console.error('🔴 [AdminLayout] Erro ao verificar autenticação:', error);
+        console.error('🔴 [AdminLayout] Tipo do erro:', error?.name);
+        console.error('🔴 [AdminLayout] Mensagem:', error?.message);
+        console.log('🔴 [AdminLayout] Redirecionando para /login...');
         router.push('/login');
       } finally {
+        console.log('🔵 [AdminLayout] Finalizando verificação de autenticação');
         setLoading(false);
       }
     }
 
     fetchUser();
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });

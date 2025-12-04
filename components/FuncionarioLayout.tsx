@@ -19,25 +19,61 @@ export default function FuncionarioLayout({ children }: { children: React.ReactN
 
   useEffect(() => {
     async function fetchUser() {
+      console.log('🔵 [FuncionarioLayout] Verificando autenticação do usuário...');
+      console.log('🔵 [FuncionarioLayout] Pathname atual:', pathname);
+      
       try {
-        const res = await fetch('/api/auth/me');
+        console.log('🔵 [FuncionarioLayout] Fazendo requisição para /api/auth/me...');
+        const res = await fetch('/api/auth/me', {
+          credentials: 'include',
+        });
+        
+        console.log('🔵 [FuncionarioLayout] Resposta recebida:', {
+          status: res.status,
+          ok: res.ok,
+          statusText: res.statusText
+        });
+        
         const data = await res.json();
+        console.log('🔵 [FuncionarioLayout] Dados recebidos:', {
+          hasUser: !!data.user,
+          userRole: data.user?.role,
+          hasError: !!data.error,
+          error: data.error
+        });
 
         if (!res.ok || !data.user) {
+          console.error('🔴 [FuncionarioLayout] Acesso negado:', {
+            resOk: res.ok,
+            hasUser: !!data.user,
+            error: data.error
+          });
+          console.log('🔴 [FuncionarioLayout] Redirecionando para /login...');
           router.push('/login');
           return;
         }
 
+        console.log('✅ [FuncionarioLayout] Usuário autenticado:', {
+          id: data.user.id,
+          nome: data.user.nome,
+          email: data.user.email,
+          role: data.user.role
+        });
         setUser(data.user);
-      } catch (error) {
+      } catch (error: any) {
+        console.error('🔴 [FuncionarioLayout] Erro ao verificar autenticação:', error);
+        console.error('🔴 [FuncionarioLayout] Tipo do erro:', error?.name);
+        console.error('🔴 [FuncionarioLayout] Mensagem:', error?.message);
+        console.log('🔴 [FuncionarioLayout] Redirecionando para /login...');
         router.push('/login');
       } finally {
+        console.log('🔵 [FuncionarioLayout] Finalizando verificação de autenticação');
         setLoading(false);
       }
     }
 
     fetchUser();
-  }, [router]);
+  }, [router, pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
