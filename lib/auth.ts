@@ -26,6 +26,10 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export function generateToken(user: UserPayload): string {
+  if (!JWT_SECRET) {
+    throw new Error('JWT_SECRET não definido nas variáveis de ambiente');
+  }
+  
   return jwt.sign(
     {
       sub: user.id,

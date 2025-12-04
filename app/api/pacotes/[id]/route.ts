@@ -4,9 +4,12 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // No Next.js 16, params é uma Promise, precisa fazer await
+    const { id } = await params;
+
     const token = request.cookies.get('token')?.value;
 
     if (!token) {
@@ -16,10 +19,9 @@ export async function GET(
       );
     }
 
-    let user;
-    try {
-      user = verifyToken(token);
-    } catch {
+    const user = verifyToken(token);
+
+    if (!user) {
       return NextResponse.json(
         { error: 'Token inválido ou expirado' },
         { status: 401 }
@@ -29,7 +31,7 @@ export async function GET(
     const { data, error } = await supabaseAdmin
       .from('pacotes')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error || !data) {

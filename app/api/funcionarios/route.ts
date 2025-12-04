@@ -12,10 +12,9 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
 
-    let user;
-    try {
-      user = verifyToken(token);
-    } catch {
+    const user = verifyToken(token);
+
+    if (!user) {
       return NextResponse.json({ error: 'Token inválido ou expirado' }, { status: 401 });
     }
 
@@ -47,10 +46,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autenticado' }, { status: 401 });
     }
 
-    let user;
-    try {
-      user = verifyToken(token);
-    } catch {
+    const user = verifyToken(token);
+
+    if (!user) {
       return NextResponse.json({ error: 'Token inválido ou expirado' }, { status: 401 });
     }
 
